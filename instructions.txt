@@ -1,0 +1,10 @@
+1. docker-compose.yaml houses all three service [users, products, orders] along with postgres and Nginx.
+2. nginx.conf contains the reverse proxy configurations.
+
+Newly created files in this repo - 
+    1. create-database.sh - to create the database during the container setup for each services.
+    2. nginx.conf - This is where all the reverse proxies are written.
+    3. start.sh - to setting up the containers.
+
+Setting up the services and containers
+1. execute the bash file start.sh

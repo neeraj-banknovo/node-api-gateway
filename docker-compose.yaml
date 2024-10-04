@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  orders:
+    build:
+      context: ./orders
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    image: orders
+    env_file:
+      - ./orders/.env
+    container_name: orders-service
+    ports:
+      - 3100:3100
+      - 4000:3100
+    networks:
+      - my-network
+    depends_on:
+      - postgres
+
+  products:
+    build:
+      context: ./products
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    image: products
+    env_file:
+      - ./products/.env
+    container_name: products-service
+    ports:
+      - 3200:3200
+      - 5000:3200
+    networks:
+      - my-network
+    depends_on:
+      - postgres
+
+  users:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    image: users
+    env_file:
+      - ./users/.env
+    container_name: users-service
+    ports:
+      - 3300:3300
+      - 7000:3300
+    networks:
+      - my-network
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    container_name: postgres-14
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_MULTIPLE_DATABASES=users,products,orders
+    volumes:
+      - ./create-databases.sh:/docker-entrypoint-initdb.d/create-databases.sh
+    networks:
+      - my-network
+
+  api-gateway:
+    image: nginx:latest
+    container_name: api-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - orders
+      - products
+      - users
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    name: my-network
